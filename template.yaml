@@ -1,0 +1,53 @@
+AWSTemplateFormatVersion: '2010-09-09' 
+Transform: AWS::Serverless-2016-10-31 
+Description: This template deploys Certificate delegating Function 
+Parameters: 
+  FunctionName: 
+    Type: String
+  Environment: 
+    Type: String 
+    Default: dev 
+  Application: 
+    Type: String
+  AcmCertRegion: 
+    Type: String
+Resources: 
+  CertificateDelegatingFunction: 
+    Type: AWS::Serverless::Function 
+    Properties: 
+      FunctionName: !Ref FunctionName 
+      CodeUri: ./ 
+      Handler: "lambda_function.lambda_handler" 
+      Environment: 
+        Variables: 
+          ACM_CERT_REGION: !Ref AcmCertRegion
+          NAME_CERT_TAG: !Sub "${Application}-ssl-cert"
+          APPLICATION_CERT_TAG: !Ref Application
+          ENVIRONMENT_CERT_TAG: !Ref Environment
+      MemorySize: 128 
+      Policies: 
+        - AWSLambdaVPCAccessExecutionRole 
+        - Version: "2012-10-17" 
+          Statement: 
+            - Effect: Allow 
+              Action: 
+                - "logs:*" 
+                - "acm:RequestCertificate"
+                - "acm:DescribeCertificate"
+                - "acm:ListCertificates"
+                - "acm:AddTagsToCertificate"
+                - "route53:ChangeResourceRecordSets"
+                - "route53:ListHostedZonesByName"
+                - "lambda:AddPermission"
+                - "lambda:RemovePermission"
+                - "events:PutRule"
+                - "events:DeleteRule"
+                - "events:PutTargets"
+                - "events:RemoveTargets"
+              Resource: "*" 
+      Runtime: python3.8
+      Timeout: 900 
+      Tags: 
+        Environment: !Ref Environment 
+        Application: !Ref Application 
+

@@ -1,0 +1,15 @@
+version: 0.2  
+phases:  
+  install:  
+    commands:  
+      - pip install --upgrade pip  
+      - pip install --upgrade awscli  
+      - pip install -r requirements.txt -t .  
+  pre_build:  
+    commands:  
+      - aws cloudformation package --template-file template.yaml --s3-bucket $LAMBDA_ARTIFACT_STORE_BUCKET --output-template-file output-template.yaml  
+artifacts:  
+  type: zip  
+  files:  
+    - template.yaml  
+    - output-template.yaml  
